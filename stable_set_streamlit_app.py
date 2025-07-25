@@ -21,7 +21,10 @@ if uploaded_file:
     df.columns = [f"Voter {i+1}" for i in range(df.shape[1])]
     st.dataframe(df)
 
-    candidates = list(df[0].dropna().unique())
+    # Ασφαλής εξαγωγή υποψηφίων από το περιεχόμενο του Excel, όχι από τα headers
+candidates = pd.unique(df.values.ravel())
+candidates = [c for c in candidates if pd.notna(c)]
+
 
     def compute_majority_graph(voter_preferences, candidates):
         from collections import defaultdict
