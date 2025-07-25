@@ -157,7 +157,7 @@ st.markdown("""
     line-height: 1.6;">
     Developed with ❤️ by <strong>Nikolaos Sampanis</strong> · 2025<br>
     🧠 Condorcet Analysis · 📊 Borda Count · 📦 Stable Sets Explorer<br>
-    <a href="https://github.com/your-username/stable-set-app" target="_blank" style="color: #60a5fa; text-decoration: none;">
+    <a href="https://github.com/nsampanis/stable-set-app" target="_blank" style="color: #60a5fa; text-decoration: none;">
         🌐 View on GitHub
     </a>
 </div>
