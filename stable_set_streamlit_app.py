@@ -6,28 +6,26 @@ from itertools import combinations
 
 st.set_page_config(page_title="Stable Set Explorer", layout="wide")
 
-st.title("Stable Set Explorer for Social Choice")
-st.write("Upload a preference profile file (.xls, .xlsx, or .csv). Each column should represent a voter's ranked preferences (top to bottom).")
+st.title("🗳️ Stable Set Explorer for Social Choice")
+st.write("Upload a preference profile (.xls, .xlsx, or .csv) with one column per voter (top = most preferred).")
 
-uploaded_file = st.file_uploader("Upload your file", type=["xls", "xlsx", "csv"])
-
-# === Συνάρτηση για Hasse Diagram ===
+# === Draw Hasse Diagram safely ===
 def draw_hasse_diagram(G):
-    """
-    Given a directed graph G (representing a dominance relation),
-    return a matplotlib figure showing the Hasse diagram (transitive reduction).
-    """
+    if not nx.is_directed_acyclic_graph(G):
+        return None
     H = nx.transitive_reduction(G)
     pos = nx.spring_layout(H, seed=42)
     fig, ax = plt.subplots()
-    nx.draw(H, pos, with_labels=True, node_color="lightgreen", node_size=2000, 
+    nx.draw(H, pos, with_labels=True, node_color="lightgreen", node_size=2000,
             font_size=14, font_weight='bold', arrows=True, ax=ax)
     ax.set_title("Hasse Diagram (Transitive Reduction of Dominance Graph)", fontsize=14)
     return fig
 
+uploaded_file = st.file_uploader("📂 Upload your file", type=["xls", "xlsx", "csv"])
+
 if uploaded_file:
     st.markdown("### 🧩 File Settings")
-    has_header = st.radio("Does your file contain a header row (e.g. 'Voter 1', 'Voter 2')?", ("Yes", "No"))
+    has_header = st.radio("Does your file contain a header row (e.g. 'Voter 1')?", ("Yes", "No"))
 
     if uploaded_file.name.endswith(".csv"):
         df = pd.read_csv(uploaded_file, header=0 if has_header == "Yes" else None)
@@ -39,8 +37,6 @@ if uploaded_file:
 
     candidates = pd.unique(df.values.ravel())
     candidates = [c for c in candidates if pd.notna(c)]
-
-    # === Συναρτήσεις Υπολογισμών ===
 
     def compute_majority_graph(voter_preferences, candidates):
         from collections import defaultdict
@@ -92,8 +88,6 @@ if uploaded_file:
                 result.add(x)
         return result
 
-    # === Υπολογισμός Γράφου και Συνόλων ===
-
     G = compute_majority_graph(df, candidates)
 
     sets = {
@@ -105,11 +99,11 @@ if uploaded_file:
     }
 
     explanations = {
-        "Van Deemen Stable Set": "A candidate that is undefeated by any other individual candidate.",
-        "Extended Stable Set": "A candidate that cannot be defeated by any coalition when evaluated pairwise.",
-        "W-Stable Set": "A candidate not defeated by any single alternative (weak stability).",
-        "Duggan Set": "A candidate undefeated and defeating at least one other candidate.",
-        "Generalized Stable Set": "A candidate not defeated by any coalition of opponents."
+        "Van Deemen Stable Set": "A candidate that is undefeated by any individual opponent.",
+        "Extended Stable Set": "A candidate that cannot be defeated by any coalition of voters.",
+        "W-Stable Set": "A candidate not defeated by any individual alternative.",
+        "Duggan Set": "Undefeated and beats at least one other candidate.",
+        "Generalized Stable Set": "Not defeated by any coalition of other candidates.",
     }
 
     for name, result in sets.items():
@@ -117,7 +111,6 @@ if uploaded_file:
         st.caption(explanations.get(name, ""))
         st.write(sorted(result) if result else "∅")
 
-    # === Γράφος Κυριαρχίας ===
     st.subheader("Majority (Dominance) Graph")
     pos = nx.spring_layout(G, seed=42)
     fig1, ax1 = plt.subplots()
@@ -125,12 +118,13 @@ if uploaded_file:
             font_size=16, font_weight='bold', ax=ax1, arrows=True)
     st.pyplot(fig1)
 
-    # === Hasse Diagram ===
     st.subheader("Hasse Diagram (Transitive Reduction)")
     fig2 = draw_hasse_diagram(G)
-    st.pyplot(fig2)
+    if fig2:
+        st.pyplot(fig2)
+    else:
+        st.warning("Cannot draw Hasse diagram: the dominance graph contains cycles (Condorcet paradox).")
 
-    # === Condorcet Winner ===
     st.subheader("🧠 Condorcet Winner")
     condorcet_winner = None
     for x in candidates:
@@ -139,11 +133,10 @@ if uploaded_file:
             break
 
     if condorcet_winner:
-        st.success(f"The Condorcet winner is **{condorcet_winner}**: beats all others in pairwise comparisons.")
+        st.success(f"The Condorcet winner is **{condorcet_winner}**.")
     else:
-        st.warning("No Condorcet winner exists — this is a Condorcet paradox! (cyclic majority preferences)")
+        st.warning("No Condorcet winner exists — this is a Condorcet paradox!")
 
-    # === Borda Count ===
     st.subheader("📊 Borda Count")
     borda_scores = {c: 0 for c in candidates}
     n = len(candidates)
@@ -156,4 +149,5 @@ if uploaded_file:
     st.dataframe(borda_df)
 
     st.markdown("---")
-    st.markdown("**Each set provides a unique lens on collective rationality and social choice stability.**")
+    st.markdown("Each set shows a different aspect of rational collective decision-making.")
+    st.markdown("App developed by **Nikos Sampanis** © 2025")
