@@ -6,10 +6,12 @@ from itertools import combinations
 
 st.set_page_config(page_title="Stable Set Explorer", layout="wide")
 
-st.title("🗳️ Stable Set Explorer for Social Choice")
-st.write("Upload a preference profile (.xls, .xlsx, or .csv) with one column per voter (top = most preferred).")
+st.title("📦 Stable Set Explorer for Social Choice Theory")
+st.write("Upload an Excel or CSV file with voter preferences (each column = one voter).")
 
-# === Draw Hasse Diagram safely ===
+uploaded_file = st.file_uploader("📁 Upload your profile file", type=["xls", "xlsx", "csv"])
+
+# ------------------------ Hasse Diagram Function ------------------------
 def draw_hasse_diagram(G):
     if not nx.is_directed_acyclic_graph(G):
         return None
@@ -18,14 +20,12 @@ def draw_hasse_diagram(G):
     fig, ax = plt.subplots()
     nx.draw(H, pos, with_labels=True, node_color="lightgreen", node_size=2000,
             font_size=14, font_weight='bold', arrows=True, ax=ax)
-    ax.set_title("Hasse Diagram (Transitive Reduction of Dominance Graph)", fontsize=14)
+    ax.set_title("Hasse Diagram (Transitive Reduction)", fontsize=14)
     return fig
 
-uploaded_file = st.file_uploader("📂 Upload your file", type=["xls", "xlsx", "csv"])
-
+# ------------------------ Main App Logic ------------------------
 if uploaded_file:
-    st.markdown("### 🧩 File Settings")
-    has_header = st.radio("Does your file contain a header row (e.g. 'Voter 1')?", ("Yes", "No"))
+    has_header = st.radio("Does your file contain a header row?", ("Yes", "No"))
 
     if uploaded_file.name.endswith(".csv"):
         df = pd.read_csv(uploaded_file, header=0 if has_header == "Yes" else None)
@@ -33,6 +33,7 @@ if uploaded_file:
         df = pd.read_excel(uploaded_file, header=0 if has_header == "Yes" else None)
 
     df.columns = [f"Voter {i+1}" for i in range(df.shape[1])]
+    st.subheader("📋 Uploaded Preference Profile")
     st.dataframe(df)
 
     candidates = pd.unique(df.values.ravel())
@@ -41,18 +42,13 @@ if uploaded_file:
     def compute_majority_graph(voter_preferences, candidates):
         from collections import defaultdict
         pairwise_counts = defaultdict(int)
-        for i in range(len(candidates)):
-            for j in range(len(candidates)):
-                if i == j:
-                    continue
-                a, b = candidates[i], candidates[j]
-                wins = 0
-                for col in voter_preferences.columns:
-                    ranks = list(voter_preferences[col].dropna())
-                    if ranks.index(a) < ranks.index(b):
-                        wins += 1
-                if wins > len(voter_preferences.columns) / 2:
-                    pairwise_counts[(a, b)] = 1
+        for a, b in combinations(candidates, 2):
+            a_wins = sum(df[col].tolist().index(a) < df[col].tolist().index(b) for col in df.columns)
+            b_wins = sum(df[col].tolist().index(b) < df[col].tolist().index(a) for col in df.columns)
+            if a_wins > len(df.columns) / 2:
+                pairwise_counts[(a, b)] = 1
+            elif b_wins > len(df.columns) / 2:
+                pairwise_counts[(b, a)] = 1
         G = nx.DiGraph()
         G.add_nodes_from(candidates)
         G.add_edges_from(pairwise_counts.keys())
@@ -77,7 +73,7 @@ if uploaded_file:
         for x in G.nodes:
             safe = True
             others = [y for y in G.nodes if y != x]
-            for r in range(1, len(others) + 1):
+            for r in range(1, len(others)+1):
                 for group in combinations(others, r):
                     if all(G.has_edge(y, x) for y in group):
                         safe = False
@@ -91,19 +87,19 @@ if uploaded_file:
     G = compute_majority_graph(df, candidates)
 
     sets = {
-        "Generalized Stable Set": generalized_stable(G),
         "Van Deemen Stable Set": van_deemen(G),
         "Extended Stable Set": extended_stable(G),
         "W-Stable Set": w_stable(G),
         "Duggan Set": duggan(G),
+        "Generalized Stable Set": generalized_stable(G),
     }
 
     explanations = {
-        "Van Deemen Stable Set": "A candidate that is undefeated by any individual opponent.",
-        "Extended Stable Set": "A candidate that cannot be defeated by any coalition of voters.",
-        "W-Stable Set": "A candidate not defeated by any individual alternative.",
-        "Duggan Set": "Undefeated and beats at least one other candidate.",
-        "Generalized Stable Set": "Not defeated by any coalition of other candidates.",
+        "Van Deemen Stable Set": "🛡️ No other alternative beats this one.",
+        "Extended Stable Set": "🧠 Cannot be beaten by any coalition.",
+        "W-Stable Set": "⚖️ Not defeated by any single alternative.",
+        "Duggan Set": "🎯 Undefeated and beats at least one opponent.",
+        "Generalized Stable Set": "📦 Resistant to all majority coalitions."
     }
 
     for name, result in sets.items():
@@ -111,19 +107,19 @@ if uploaded_file:
         st.caption(explanations.get(name, ""))
         st.write(sorted(result) if result else "∅")
 
-    st.subheader("Majority (Dominance) Graph")
+    st.subheader("🔄 Dominance Graph")
     pos = nx.spring_layout(G, seed=42)
-    fig1, ax1 = plt.subplots()
+    fig, ax = plt.subplots()
     nx.draw(G, pos, with_labels=True, node_color="skyblue", node_size=2000,
-            font_size=16, font_weight='bold', ax=ax1, arrows=True)
-    st.pyplot(fig1)
+            font_size=14, font_weight='bold', arrows=True, ax=ax)
+    st.pyplot(fig)
 
-    st.subheader("Hasse Diagram (Transitive Reduction)")
+    st.subheader("🪜 Hasse Diagram (Transitive Reduction)")
     fig2 = draw_hasse_diagram(G)
     if fig2:
         st.pyplot(fig2)
     else:
-        st.warning("Cannot draw Hasse diagram: the dominance graph contains cycles (Condorcet paradox).")
+        st.warning("Cannot display Hasse diagram: the dominance graph is not acyclic (contains cycles).")
 
     st.subheader("🧠 Condorcet Winner")
     condorcet_winner = None
@@ -131,11 +127,10 @@ if uploaded_file:
         if all(G.has_edge(x, y) for y in candidates if y != x):
             condorcet_winner = x
             break
-
     if condorcet_winner:
         st.success(f"The Condorcet winner is **{condorcet_winner}**.")
     else:
-        st.warning("No Condorcet winner exists — this is a Condorcet paradox!")
+        st.warning("No Condorcet winner exists — Condorcet paradox detected!")
 
     st.subheader("📊 Borda Count")
     borda_scores = {c: 0 for c in candidates}
@@ -144,10 +139,26 @@ if uploaded_file:
         ranking = list(df[col].dropna())
         for idx, candidate in enumerate(ranking):
             borda_scores[candidate] += n - idx - 1
-
     borda_df = pd.DataFrame(sorted(borda_scores.items(), key=lambda x: -x[1]), columns=["Candidate", "Borda Score"])
     st.dataframe(borda_df)
 
-    st.markdown("---")
-    st.markdown("Each set shows a different aspect of rational collective decision-making.")
-    st.markdown("App developed by **Nikos Sampanis** © 2025")
+# ------------------------ Footer ------------------------
+st.markdown("""
+<hr style="border: 1px solid #ccc; margin-top: 3em;">
+
+<div style="
+    background-color: #1f2937;
+    color: #f3f4f6;
+    padding: 14px;
+    border-radius: 10px;
+    text-align: center;
+    font-size: 15px;
+    margin-top: 40px;
+    line-height: 1.6;">
+    Developed with ❤️ by <strong>Nikolaos Sampanis</strong> · 2025<br>
+    🧠 Condorcet Analysis · 📊 Borda Count · 📦 Stable Sets Explorer<br>
+    <a href="https://github.com/your-username/stable-set-app" target="_blank" style="color: #60a5fa; text-decoration: none;">
+        🌐 View on GitHub
+    </a>
+</div>
+""", unsafe_allow_html=True)
