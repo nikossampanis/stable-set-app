@@ -22,8 +22,8 @@ if uploaded_file:
     st.dataframe(df)
 
     # Ασφαλής εξαγωγή υποψηφίων από το περιεχόμενο του Excel, όχι από τα headers
-candidates = pd.unique(df.values.ravel())
-candidates = [c for c in candidates if pd.notna(c)]
+    candidates = pd.unique(df.values.ravel())
+    candidates = [c for c in candidates if pd.notna(c)]
 
 
     def compute_majority_graph(voter_preferences, candidates):
