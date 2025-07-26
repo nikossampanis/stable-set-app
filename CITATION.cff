@@ -7,4 +7,5 @@ authors:
     given-names: "Nikolaos"
     affiliation: "Computer Science Researcher"
 url: "https://stable-set-app-abuvtusvf2ppvbj3jc5anv.streamlit.app/"
+doi: "https://doi.org/10.5281/zenodo.16449384"
 license: "MIT"
