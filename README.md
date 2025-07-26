@@ -39,16 +39,7 @@ pip install -r requirements.txt
 streamlit run stable_set_streamlit_app.py
 ```
 
-## 🌐 Run Online
 
-1. Upload this repo to GitHub
-2. Go to [streamlit.io/cloud](https://streamlit.io/cloud)
-3. Create a new app linked to your GitHub
-4. Set the app file to `stable_set_streamlit_app.py`
-
-## 📘 Citation & DOI
-
-Once uploaded to GitHub, link it to [Zenodo](https://zenodo.org/) to get a DOI for citation in academic work.
 
 ---
 
