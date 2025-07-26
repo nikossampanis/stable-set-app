@@ -84,6 +84,31 @@ if uploaded_file:
                 result.add(x)
         return result
 
+    # --- Νέος ορισμός συνάρτησης m_stable ---
+    def m_stable(G):
+        """
+        Υπολογίζει το m-stable set του γράφου G.
+        Ένας κόμβος είναι m-stable αν δεν ηττάται από καμία συμμαχία
+        που αποτελείται από κόμβους που δεν ηττώνται από αυτόν.
+        """
+        stable_set = set()
+        nodes = set(G.nodes)
+
+        for x in nodes:
+            non_defeated_by_x = {y for y in nodes if not G.has_edge(x, y)}
+            dominated = False
+            for r in range(1, len(non_defeated_by_x) + 1):
+                for coalition in combinations(non_defeated_by_x, r):
+                    if all(G.has_edge(member, x) for member in coalition):
+                        dominated = True
+                        break
+                if dominated:
+                    break
+            if not dominated:
+                stable_set.add(x)
+
+        return stable_set
+
     G = compute_majority_graph(df, candidates)
 
     sets = {
@@ -92,6 +117,7 @@ if uploaded_file:
         "W-Stable Set": w_stable(G),
         "Duggan Set": duggan(G),
         "Generalized Stable Set": generalized_stable(G),
+        "M-Stable Set": m_stable(G),  # Νέο σύνολο
     }
 
     explanations = {
@@ -99,7 +125,8 @@ if uploaded_file:
         "Extended Stable Set": "🧠 Cannot be beaten by any coalition.",
         "W-Stable Set": "⚖️ Not defeated by any single alternative.",
         "Duggan Set": "🎯 Undefeated and beats at least one opponent.",
-        "Generalized Stable Set": "📦 Resistant to all majority coalitions."
+        "Generalized Stable Set": "📦 Resistant to all majority coalitions.",
+        "M-Stable Set": "🔒 Not collectively dominated by any coalition of candidates it does not defeat."
     }
 
     for name, result in sets.items():
