@@ -32,12 +32,20 @@ This means:
 - Voter 2: B > C > A
 - Voter 3: C > A > B
 
-## 🚀 Run Locally
+## Citation
 
-```bash
-pip install -r requirements.txt
-streamlit run stable_set_streamlit_app.py
-```
+If you use this software, please cite it as:
+
+```bibtex
+@software{sampanis2025stable,
+  author       = {Nikolaos Sampanis},
+  title        = {Stable Set Explorer for Social Choice},
+  year         = 2025,
+  publisher    = {Zenodo},
+  version      = {1.0.0},
+  doi          = {10.5281/zenodo.16449384},
+  url          = {https://stable-set-app-abuvtusvf2ppvbj3jc5anv.streamlit.app/}
+}
 
 
 
