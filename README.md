@@ -8,9 +8,9 @@ This is a Streamlit application for analyzing voting profiles and computing vari
 - Computes and explains:
   - Van Deemen Stable Set
   - Extended Stable Set
-  - W-Stable Set
+  - w-Stable Set
   - Duggan Set
-  - Alexandrov Set
+  - m - stable Set
 - Visualizes the **dominance graph** (Hasse diagram)
 
 ## 📂 Example Input
