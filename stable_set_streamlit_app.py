@@ -5,7 +5,30 @@ import matplotlib.pyplot as plt
 from itertools import combinations
 
 st.set_page_config(page_title="Stable Set Explorer", layout="wide")
+import base64
 
+favicon_base64 = """
+iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAABGFBMVEUAAABcXFxVVVXa
+2to5OTnW1tZ1dXXq6urx8fHq6urp6enX19fd3d3e3t6SkpKWlpbn5+fb29vOzs7u7u7p
+6emLi4vOzs7Y2NjR0dG9vb0eHh7FxcXGxsaioqKOjo5ISEg4ODgxMTH///8zMzMcHBwv
+Ly9JSUnY2NjT09NISEjMzMyDg4OGhoaRkZHZ2dnBwcF5eXmAgIB0dHRBQUEZGRnPz8/t
+7e2EhIRaWlo7OzvX19dLS0sAAABHR0cNDA1TU1OJioqUlJSgoKAFhYX39/fV1dXU1NRs
+bGwpKSksLCwtLS1aWlojIyMcHBz9/f2urq6VlZXJycljY2MkJCRra2vq6uqBgYGZmZnr
+6+uioqKLioqUlJSjo6M5OTmVlZVWVlbAwMCwsLCZmZmVlZXDw8PU1NRZWVnHx8eFhYUu
+Li45OTmTk5Pa2toWFhZaWlo2NjZKSkq9vb0fHx9AQECkpKS5ubnY2NhISEgqKiopKSlA
+QEBycnIiIiIrKysrKys1NTU6OjoNDQ1dXV1cXFxXV1dPT09SUlJSUlKmpqZvE8Z7AAAB
+VklEQVQY05WOSxaCMBCFZ+0NClLVh3I0SkpWlbr///W1CgRn3C3gZjHuHB4bOmu6DQpU
+6m0CGtQYiq1ZGTphE++5NhnV3XkjCpRKZDKRtczrf1i05JZN1HKN8c10wtLv0WkTnFgh
+CzRdYKv0xpmiqlae2mc4xl2w2fAItu1hqA7yGdbkE6zPTGYb96D7PgtF4dcuPAPaqNqz
+H7pLHo1MgLK3g4PgJkZhDRkBvRs8TpWeG4rv/f/zwFcCX4EpT3g4vyu1egTwuacC4qg+
+pPdrXhf7wF5BOx1bMn+g3KXoR7hzDhx8AN2QiAwCjGZfD2AAAAAElFTkSuQmCC
+"""
+
+favicon_html = f"""
+<link rel="icon" href="data:image/png;base64,{favicon_base64.strip()}" type="image/png" />
+"""
+
+st.markdown(favicon_html, unsafe_allow_html=True)
 st.title("📦 Stable Set Explorer for Social Choice Theory")
 st.write("Upload an Excel or CSV file with voter preferences (each column = one voter).")
 
