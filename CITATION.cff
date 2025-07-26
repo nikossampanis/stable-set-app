@@ -1,0 +1,13 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "Stable Set Explorer for Social Choice"
+version: "1.0.0"
+date-released: 2025-07-25
+authors:
+  - family-names: "Sampanis"
+    given-names: "Nikolaos"
+    orcid: "https://orcid.org/0000-0000-0000-0000"
+    affiliation: "Independent Researcher"
+doi: "10.5281/zenodo.1234567"
+url: "https://github.com/nsampanis/stable-set-app"
+license: "MIT"
