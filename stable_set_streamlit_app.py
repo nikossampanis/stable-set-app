@@ -27,7 +27,7 @@ favicon_html = f"""
 <link rel="icon" href="data:image/png;base64,{favicon_base64.strip()}" type="image/png" />
 """
 
-st.set_page_config(page_title="Stable Set Explorer", layout="wide")
+st.set_page_config(page_title="Stable Set Explorer",page_icon="images/favicon.ico", layout="wide")
 st.markdown(favicon_html, unsafe_allow_html=True)
 
 st.title("📦 Stable Set Explorer for Social Choice Theory")
